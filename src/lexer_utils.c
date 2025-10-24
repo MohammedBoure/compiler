@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 
 void todo(const char* caller_name){
@@ -14,7 +15,7 @@ void todo(const char* caller_name){
 typedef void*  sometype;
 
 
-//exo2
+// exo2
 struct Token {
     sometype lexeme;
     sometype type;
@@ -24,22 +25,29 @@ struct Token {
 typedef struct Token Token;
 
 
-//exo3
-int isKeyword(const char word){
-    todo(__func__);
+const char *Keywords[] = {"int", "if", "else", "while", "return"};
+const int KeywordCount = 5;
+
+// exo3
+int isKeyword(const char* word){
+    for (int i = 0; i < KeywordCount; i++) {
+        if (strcmp(word, Keywords[i]) == 0)
+            return 1;
+    }
+    return 0;
 }
 
-//exo4
+// exo4
 int isIdentifierStart(char c){
     todo(__func__);
 }
 
-//exo4
+// exo4
 int isIdentifierChar(char c){
     todo(__func__);
 }
 
-//exo5
+// exo5
 int isOperatorChat(char c){
     todo(__func__);
 }
