@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "lexer_utils.c"
 
 
 /*
@@ -14,15 +13,15 @@
  */
 int count_lines_from_file(const char* file_name){
     FILE* file = fopen(file_name, "r");
-    if(file == NULL){
-        fprintf(stderr,"Error opening file");
+    if (file == NULL){
+        fprintf(stderr,"Error opening file: '%s'\n",file_name);
         return -1;
     }
 
     int number_lines = 0;
     int c;
     while ((c = fgetc(file)) != EOF){
-        if(c == '\n') number_lines++;
+        if (c == '\n') number_lines++;
     }
 
     fclose(file);
@@ -31,6 +30,10 @@ int count_lines_from_file(const char* file_name){
 
 
 int main(){
-    int n = count_lines_from_file("test.txt");
-    printf("%d",n);
+    const char* file_name= "test.txt";
+    int n = count_lines_from_file(file_name);
+
+    if (n < 0) return n; // exit on error
+    printf("file:'%s' has %d line\n",file_name,n);
+    return 0;
 }
