@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 
 void todo(const char* caller_name){
     // Helper function for functions that arent implemented yet
@@ -31,12 +31,17 @@ int isKeyword(const char word){
 
 //exo4
 int isIdentifierStart(char c){
-    todo(__func__);
+    return ( (c >= 'A' && c <= 'Z') ||
+             (c >= 'a' && c <= 'z') ||
+             (c == '_') );
 }
 
 //exo4
 int isIdentifierChar(char c){
-    todo(__func__);
+    return ( (c >= 'A' && c <= 'Z') ||
+             (c >= 'a' && c <= 'z') ||
+             (c >= '0' && c <= '9') ||
+             (c == '_') );
 }
 
 //exo5
