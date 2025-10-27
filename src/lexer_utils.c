@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 void todo(const char* caller_name){
     // Helper function for functions that arent implemented yet
     // print the caller name and exit
@@ -11,19 +10,45 @@ void todo(const char* caller_name){
     exit(74);
 }
 
-// a type for unknown or non implemented types
-typedef void*  sometype;
+/*
+-------------------------------------------------------------
+ TokenType Enumeration
+-------------------------------------------------------------
+ Defines the finite set of token categories recognized during
+ lexical analysis (the first phase of compilation).
 
+ Each token t ∈ TokenType represents a class of lexical elements:
+ - TOKEN_IDENTIFIER : variable or function names
+ - TOKEN_KEYWORD    : reserved language keywords
+ - TOKEN_NUMBER     : numeric literals (ℝ or ℤ)
+ - TOKEN_OPERATOR   : arithmetic/logical operators
+ - TOKEN_STRING     : string literals ("...")
+ - TOKEN_SYMBOL     : punctuation symbols (;, (), {})
+ - TOKEN_EOF        : end-of-file marker
+ - TOKEN_UNKNOWN    : undefined or invalid token
 
-// exo2
-struct Token {
-    sometype lexeme;
-    sometype type;
-    sometype value;
-    sometype line;
-};
-typedef struct Token Token;
+ Formally, TokenType = {IDENTIFIER, KEYWORD, NUMBER, OPERATOR,
+                        STRING, SYMBOL, EOF, UNKNOWN}
+-------------------------------------------------------------
+*/
+typedef enum {
+    TOKEN_IDENTIFIER,
+    TOKEN_KEYWORD,
+    TOKEN_NUMBER,
+    TOKEN_OPERATOR,
+    TOKEN_STRING,
+    TOKEN_SYMBOL,
+    TOKEN_EOF,
+    TOKEN_UNKNOWN
+} TokenType;
 
+//exo2
+typedef struct {
+    TokenType type;
+    char* lexeme;
+    double numberValue;
+    int line;
+} Token;
 
 const char *Keywords[] = {"int", "if", "else", "while", "return"};
 const int KeywordCount = 5;
@@ -39,12 +64,17 @@ int isKeyword(const char* word){
 
 // exo4
 int isIdentifierStart(char c){
-    todo(__func__);
+    return ( (c >= 'A' && c <= 'Z') ||
+             (c >= 'a' && c <= 'z') ||
+             (c == '_') );
 }
 
 // exo4
 int isIdentifierChar(char c){
-    todo(__func__);
+    return ( (c >= 'A' && c <= 'Z') ||
+             (c >= 'a' && c <= 'z') ||
+             (c >= '0' && c <= '9') ||
+             (c == '_') );
 }
 
 // exo5
