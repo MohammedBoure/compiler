@@ -65,7 +65,51 @@ char skipWhitespaceAndComments(FILE* fp, int* lineNumber) {
 
 // exo7: Recognize identifiers and keywords
 Token recognizeIdentifierOrKeyword(FILE* fp, char firstChar, int line){
-    todo(__func__);
+    size_t capacity = 32;
+    size_t length = 0;
+    char* lexeme = malloc(capacity);
+    if (!lexeme) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+
+    lexeme[length++] = firstChar;
+
+    int c;
+    // Continue reading while characters are valid for identifiers
+    while ((c = fgetc(fp)) != EOF && isIdentifierChar(c)) {
+        // Resize buffer if needed
+        if (length + 1 >= capacity) {
+            capacity *= 2;
+            lexeme = realloc(lexeme, capacity);
+            if (!lexeme) {
+                fprintf(stderr, "Memory reallocation failed\n");
+                exit(1);
+            }
+        }
+        lexeme[length++] = c;
+    }
+
+    lexeme[length] = '\0';
+
+    // Return the last non-identifier character to the stream
+    if (c != EOF) {
+        ungetc(c, fp);
+    }
+
+    Token token;
+    token.line = line;
+    token.lexeme = lexeme;
+
+    if (isKeyword(lexeme)) {
+        token.type = TOKEN_KEYWORD;
+    } else {
+        token.type = TOKEN_IDENTIFIER;
+    }
+
+    token.numberValue = 0.0;  // not used for identifiers
+
+    return token;
 }
 
 // exo8: Recognize numbers
