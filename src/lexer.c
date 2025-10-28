@@ -2,8 +2,65 @@
 #include "lexer_utils.c"
 
 // exo6: Skip whitespace and comments
-char skipWhitespaceAndComments(FILE* fp, int* lineNumber){
-    todo(__func__);
+char skipWhitespaceAndComments(FILE* fp, int* lineNumber) {
+    int c;
+    int state = 0;  // for comment state: 0 = no comment, 1 = in /* */ comment
+
+    while ((c = fgetc(fp)) != EOF) {
+        if (c == ' ' || c == '\t') {
+            continue;
+        }
+
+        if (c == '\n') {
+            (*lineNumber)++;
+            continue;
+        }
+
+        if (c == '/' && !state) {
+            int next = fgetc(fp);
+            if (next == '/') {
+                while ((c = fgetc(fp)) != EOF && c != '\n') {
+                }
+                if (c == '\n') {
+                    (*lineNumber)++;
+                }
+                continue;
+            } else {
+                ungetc(next, fp);
+                return '/';
+            }
+        }
+
+        if (c == '/' && !state) {
+            int next = fgetc(fp);
+            if (next == '*') {
+                state = 1;  
+                continue;
+            } else {
+                ungetc(next, fp);
+                return '/';
+            }
+        }
+
+        if (state == 1) {
+            if (c == '\n') {
+                (*lineNumber)++;
+            } else if (c == '*') {
+                int next = fgetc(fp);
+                if (next == '/') {
+                    state = 0; 
+                    continue;
+                } else {
+                    ungetc(next, fp);
+                }
+            }
+            continue;
+        }
+
+        return c;
+    }
+
+    return EOF;
 }
 
 // exo7: Recognize identifiers and keywords
