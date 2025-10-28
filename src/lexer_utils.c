@@ -78,8 +78,13 @@ int isIdentifierChar(char c){
 }
 
 // exo5
-int isOperatorChat(char c){
-    todo(__func__);
+static const char OPERATOR_CHARS[] = "+-*/=< >!";
+int isOperatorChar(char c) {
+    for (int i = 0; OPERATOR_CHARS[i] != '\0'; i++) {
+        if (c == OPERATOR_CHARS[i]) {
+            return 1;
+        }
+    }
+    return 0;
 }
-
 
