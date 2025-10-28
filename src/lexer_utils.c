@@ -42,7 +42,6 @@ typedef enum {
     TOKEN_UNKNOWN
 } TokenType;
 
-
 //exo2
 typedef struct {
     TokenType type;
@@ -51,19 +50,26 @@ typedef struct {
     int line;
 } Token;
 
-//exo3
-int isKeyword(const char word){
-    todo(__func__);
+const char *Keywords[] = {"int", "if", "else", "while", "return"};
+const int KeywordCount = 5;
+
+// exo3
+int isKeyword(const char* word){
+    for (int i = 0; i < KeywordCount; i++) {
+        if (strcmp(word, Keywords[i]) == 0)
+            return 1;
+    }
+    return 0;
 }
 
-//exo4
+// exo4
 int isIdentifierStart(char c){
     return ( (c >= 'A' && c <= 'Z') ||
              (c >= 'a' && c <= 'z') ||
              (c == '_') );
 }
 
-//exo4
+// exo4
 int isIdentifierChar(char c){
     return ( (c >= 'A' && c <= 'Z') ||
              (c >= 'a' && c <= 'z') ||
@@ -71,7 +77,7 @@ int isIdentifierChar(char c){
              (c == '_') );
 }
 
-//exo5
+// exo5
 int isOperatorChat(char c){
     todo(__func__);
 }
