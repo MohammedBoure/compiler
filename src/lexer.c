@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <ctype.h>
-#include <stdlib.h>
 #include "lexer_utils.c"
 
-// exo6: Skip whitespace and comments
+// exo6: Skip whitespace and comments, need simple rework
+// int skipWhitespaceAndComments(FILE* fp)
 char skipWhitespaceAndComments(FILE* fp, int* lineNumber) {
     int c;
     int state = 0;  // for comment state: 0 = no comment, 1 = in /* */ comment
@@ -65,123 +65,66 @@ char skipWhitespaceAndComments(FILE* fp, int* lineNumber) {
     return EOF;
 }
 
-// exo7: Recognize identifiers and keywords
-Token recognizeIdentifierOrKeyword(FILE* fp, char firstChar, int line){
-    size_t capacity = 32;
-    size_t length = 0;
-    char* lexeme = malloc(capacity);
-    if (!lexeme) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(1);
-    }
 
-    lexeme[length++] = firstChar;
 
-    int c;
-    // Continue reading while characters are valid for identifiers
-    while ((c = fgetc(fp)) != EOF && isIdentifierChar(c)) {
-        // Resize buffer if needed
-        if (length + 1 >= capacity) {
-            capacity *= 2;
-            lexeme = realloc(lexeme, capacity);
-            if (!lexeme) {
-                fprintf(stderr, "Memory reallocation failed\n");
-                exit(1);
-            }
-        }
-        lexeme[length++] = c;
-    }
+// simple string recognition functions
+int isKeyword(const char* s);
+int isNumber(const char* s);
+int isOperator(const char* s);
+int isDelimiter(const char* s);
 
-    lexeme[length] = '\0';
 
-    // Return the last non-identifier character to the stream
-    if (c != EOF) {
-        ungetc(c, fp);
-    }
-
-    Token token;
-    token.line = line;
-    token.lexeme = lexeme;
-
-    if (isKeyword(lexeme)) {
-        token.type = TOKEN_KEYWORD;
-    } else {
-        token.type = TOKEN_IDENTIFIER;
-    }
-
-    token.numberValue = 0.0;  // not used for identifiers
-
-    return token;
-}
-
-// exo8: Recognize numbers
-Token recognizeNumber(FILE* fp, char firstChar, int line){
-    size_t capacity = 32;
-    size_t length = 0;
-    char* buffer = malloc(capacity);
-    if (!buffer) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(1);
-    }
-
-    buffer[length++] = firstChar;
-
-    int c;
-    while ((c = fgetc(fp)) != EOF) {
-        if (isdigit(c) || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-') {
-            if (length + 1 >= capacity) {
-                capacity *= 2;
-                buffer = realloc(buffer, capacity);
-                if (!buffer) exit(1);
-            }
-            buffer[length++] = c;
-        } else {
-            ungetc(c, fp);
-            break;
-        }
-    }
-    buffer[length] = '\0';
-
-    char* endptr;
-    double value = strtod(buffer, &endptr);
-
-    if (endptr == buffer) {
-        free(buffer);
-        Token t = { .type = TOKEN_UNKNOWN, .lexeme = NULL, .line = line };
-        return t;
-    }
-
-    while (endptr < buffer + length) {
-        ungetc(*(endptr++), fp);
-    }
-
-    size_t valid_len = endptr - buffer;
-    buffer[valid_len] = '\0';
-    buffer = realloc(buffer, valid_len + 1);  
-
-    Token token = {
-        .type = TOKEN_NUMBER,
-        .lexeme = buffer,
-        .numberValue = value,
-        .line = line
-    };
-
-    return token;
-}
-
-// exo9: Recognize operators and delimiters
-Token recognizeOperatorOrDelimiter(FILE* fp, char firstChar, int line){
-    todo(__func__);
-}
-
-// exo10: Recognize strings and char literals
-Token recognizeStringOrChar(FILE* fp, char quote, int line){
-    todo(__func__);
-}
 
 //exo11
-Token getNextToken(FILE* file){
-  todo(__func__);
+Token getNextToken(FILE* file) {
+    static int line = 1;
+    Token token;
+
+    // Skip comments,spaces and update line count
+    line += skipWhitespaceAndComments(file);
+
+    // check EOF
+    int c = fgetc(file);
+    if (c == EOF) {
+        token.type = TOKEN_EOF;
+        return token;
+    }
+
+    // Read lexeme until token boundary
+    char buffer[256];
+    int i = 0;
+    buffer[i++] = c;
+
+    while ((c = fgetc(file)) != EOF) {
+        char s[2] = {c, 0};
+        if (isspace(c) || isOperator(s) || isDelimiter(s)) {
+            ungetc(c, file); // stop at token boundary
+            break;
+        }
+        buffer[i++] = c;
+    }
+    buffer[i] = '\0';
+
+    token.lexeme = strdup(buffer);
+    token.line = line;
+
+    // Determine token type using helper functions
+    if (isKeyword(token.lexeme)) {
+        token.type = TOKEN_KEYWORD;
+    } else if (isNumber(token.lexeme)) {
+        token.type = TOKEN_NUMBER;
+        token.numberValue = atof(token.lexeme);
+    } else if (isOperator(token.lexeme)) {
+        token.type = TOKEN_OPERATOR;
+    } else if (isDelimiter(token.lexeme)) {
+        token.type = TOKEN_SYMBOL;
+    } else if (isIdentifier(token.lexeme)) {  // fallback
+        token.type = TOKEN_IDENTIFIER;
+    } else {
+        token.type = TOKEN_UNKNOWN;
+    }
+
+    return token;
 }
 
 //exo12
