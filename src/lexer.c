@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include "lexer_utils.c"
 
 // exo6: Skip whitespace and comments
@@ -114,7 +116,57 @@ Token recognizeIdentifierOrKeyword(FILE* fp, char firstChar, int line){
 
 // exo8: Recognize numbers
 Token recognizeNumber(FILE* fp, char firstChar, int line){
-    todo(__func__);
+    size_t capacity = 32;
+    size_t length = 0;
+    char* buffer = malloc(capacity);
+    if (!buffer) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+
+    buffer[length++] = firstChar;
+
+    int c;
+    while ((c = fgetc(fp)) != EOF) {
+        if (isdigit(c) || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-') {
+            if (length + 1 >= capacity) {
+                capacity *= 2;
+                buffer = realloc(buffer, capacity);
+                if (!buffer) exit(1);
+            }
+            buffer[length++] = c;
+        } else {
+            ungetc(c, fp);
+            break;
+        }
+    }
+    buffer[length] = '\0';
+
+    char* endptr;
+    double value = strtod(buffer, &endptr);
+
+    if (endptr == buffer) {
+        free(buffer);
+        Token t = { .type = TOKEN_UNKNOWN, .lexeme = NULL, .line = line };
+        return t;
+    }
+
+    while (endptr < buffer + length) {
+        ungetc(*(endptr++), fp);
+    }
+
+    size_t valid_len = endptr - buffer;
+    buffer[valid_len] = '\0';
+    buffer = realloc(buffer, valid_len + 1);  
+
+    Token token = {
+        .type = TOKEN_NUMBER,
+        .lexeme = buffer,
+        .numberValue = value,
+        .line = line
+    };
+
+    return token;
 }
 
 // exo9: Recognize operators and delimiters
