@@ -2,28 +2,6 @@
 #include <stdlib.h>
 #include "lexer_utils.c"
 
-void printToken(const Token* t) {
-    printf("Token{ type: ");
-
-    switch (t->type) {
-        case TOKEN_IDENTIFIER: printf("IDENTIFIER"); break;
-        case TOKEN_KEYWORD:    printf("KEYWORD");    break;
-        case TOKEN_NUMBER:     printf("NUMBER");     break;
-        case TOKEN_OPERATOR:   printf("OPERATOR");   break;
-        case TOKEN_STRING:     printf("STRING");     break;
-        case TOKEN_SYMBOL:     printf("SYMBOL");     break;
-        case TOKEN_EOF:        printf("EOF");        break;
-        case TOKEN_UNKNOWN:    printf("UNKNOWN");    break;
-    }
-
-    printf(", lexeme: '%s'", t->lexeme ? t->lexeme : "NULL");
-
-    if (t->type == TOKEN_NUMBER) {
-        printf(", value: %.2f", t->numberValue);
-    }
-
-    printf(", line: %d }\n", t->line);
-}
 
 int main(){
     printf("=== Testing Token Structure ===\n\n");
