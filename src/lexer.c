@@ -180,12 +180,36 @@ Token recognizeStringOrChar(FILE* fp, char quote, int line){
 }
 
 //exo11
-int getNextToken(FILE* file){
+Token getNextToken(FILE* file){
   todo(__func__);
 }
 
 //exo12
-int main(){
-  todo(__func__);
+int main(int argc, char *argv[]) {
+    // compile with gcc lexer.c -o lexer
+    // run with lexer filename
+
+    // Warning: token type printing isnt implemented yet
+
+    if (argc == 1){ printf("provide filename as a command line argument\n");}
+
+    FILE *file = fopen(argv[1], "r");
+    if (file==NULL){
+        fprintf(stderr,"Cannot open file: '%s'.\n",argv[1]);
+        return 1;
+    }
+
+    printf("Warning: Token type printing not implemented yet.\n");
+    printf("Line | Lexeme          | Token Type   | Value\n");
+    printf("-----------------------------------------------\n");
+    for (Token t = getNextToken(file); t.type != TOKEN_EOF; t = getNextToken(file)) {
+        if (t.type == TOKEN_NUMBER)
+            printf("%4d | %-15s | %-12s | %.2f\n", t.line, t.lexeme, "idk", t.numberValue);
+        else
+            printf("%4d | %-15s | %-12s | -\n", t.line, t.lexeme, "idk");
+    }
+
+    fclose(file);
+    return 0;
 }
 
