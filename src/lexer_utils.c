@@ -88,7 +88,6 @@ int isNumber(const char* s) {
             hasDecimal = 1;
             continue;
         }
-        // Invalid character for a number
         return 0;
     }
 
@@ -139,6 +138,21 @@ int isIdentifierChar(char c){
              (c >= 'a' && c <= 'z') ||
              (c >= '0' && c <= '9') ||
              (c == '_') );
+}
+
+int isIdentifier(const char* word) {
+    if (word == NULL || *word == '\0')
+        return 0;
+
+    if (!isIdentifierStart(word[0]))
+        return 0;
+
+    for (int i = 1; word[i] != '\0'; i++) {
+        if (!isIdentifierChar(word[i]))
+            return 0;
+    }
+
+    return 1;
 }
 
 // exo5
