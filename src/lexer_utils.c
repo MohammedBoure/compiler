@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 void todo(const char* caller_name){
     // Helper function for functions that arent implemented yet
@@ -51,8 +52,19 @@ typedef struct {
     int line;
 } Token;
 
-const char *Keywords[] = {"int", "if", "else", "while", "return"};
-const int KeywordCount = 5;
+const char *Keywords[] = {
+    "int", "float", "double", "char", "void", "short", "long", "signed", "unsigned",
+
+    "if", "else", "switch", "case", "default",
+    "while", "do", "for", "break", "continue", "return",
+
+    "const", "static", "typedef",
+
+    "struct", "union", "enum",
+
+    "sizeof", 
+};
+const int KeywordCount = sizeof(Keywords) / sizeof(Keywords[0]);
 
 // exo3
 int isKeyword(const char* word){
@@ -122,6 +134,21 @@ int isOperator(const char* s) {
         if (strcmp(s, OPERATORS[i]) == 0)
             return 1;
     }
+    return 0;
+}
+
+int isString(const char* s) {
+    if (s == NULL)
+        return 0;
+
+    size_t len = strlen(s);
+
+    if (len < 2)
+        return 0;
+
+    if (s[0] == '"' && s[len - 1] == '"')
+        return 1;
+
     return 0;
 }
 

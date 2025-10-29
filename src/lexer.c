@@ -69,6 +69,20 @@ Token getNextToken(FILE* file) {
     int i = 0;
     buffer[i++] = c;
 
+    if (c == '"') {
+        buffer[i++] = c;
+        while ((c = fgetc(file)) != EOF && c != '"') {
+            if (c == '\n') {
+                // Strings cannot span multiple lines (in basic lexer)
+                fprintf(stderr, "Error: Unterminated string at line %d\n", line);
+                break;
+            }
+            buffer[i++] = c;
+            if (i >= sizeof(buffer) - 2) break; // avoid overflow
+        }
+        buffer[i++] = '"'; 
+    }
+
     while ((c = fgetc(file)) != EOF) {
         char s[2] = {c, 0};
         if (isspace(c) || isOperator(s) || isDelimiter(s)) {
@@ -94,6 +108,8 @@ Token getNextToken(FILE* file) {
         token.type = TOKEN_SYMBOL;
     } else if (isIdentifier(token.lexeme)) {  // fallback
         token.type = TOKEN_IDENTIFIER;
+    } else if (isString(token.lexeme)) {
+        token.type = TOKEN_STRING;
     } else {
         token.type = TOKEN_UNKNOWN;
     }
