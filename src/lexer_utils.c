@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 void todo(const char* caller_name){
     // Helper function for functions that arent implemented yet
@@ -88,25 +89,45 @@ int isOperatorChar(char c) {
     return 0;
 }
 
-void printToken(const Token* t) {
-    printf("Token{ type: ");
 
-    switch (t->type) {
-        case TOKEN_IDENTIFIER: printf("IDENTIFIER"); break;
-        case TOKEN_KEYWORD:    printf("KEYWORD");    break;
-        case TOKEN_NUMBER:     printf("NUMBER");     break;
-        case TOKEN_OPERATOR:   printf("OPERATOR");   break;
-        case TOKEN_STRING:     printf("STRING");     break;
-        case TOKEN_SYMBOL:     printf("SYMBOL");     break;
-        case TOKEN_EOF:        printf("EOF");        break;
-        case TOKEN_UNKNOWN:    printf("UNKNOWN");    break;
+const char* getTokenTypeString(TokenType type) {
+    switch (type) {
+        case TOKEN_IDENTIFIER: return "IDENTIFIER";
+        case TOKEN_KEYWORD:    return "KEYWORD";
+        case TOKEN_NUMBER:     return "NUMBER";
+        case TOKEN_OPERATOR:   return "OPERATOR";
+        case TOKEN_STRING:     return "STRING";
+        case TOKEN_EOF:        return "EOF";
+        case TOKEN_UNKNOWN:    return "UNKNOWN";
+        default:               return "UNKNOWN";
     }
+}
 
-    printf(", lexeme: '%s'", t->lexeme ? t->lexeme : "NULL");
+void printTokenHeader() {
+    printf("+--------------+----------------------+-------------+--------+\n");
+    printf("| Type         | Lexeme               | Value       | Line   |\n");
+    printf("+--------------+----------------------+-------------+--------+\n");
+}
+
+void printTokenFooter() {
+    printf("+--------------+----------------------+-------------+--------+\n");
+}
+
+
+void printToken(const Token* t) {
+    char valueStr[32] = "-";
 
     if (t->type == TOKEN_NUMBER) {
-        printf(", value: %.2f", t->numberValue);
+        if (fmod(t->numberValue, 1.0) == 0.0) // for test if integer
+            sprintf(valueStr, "%d", (int)t->numberValue); 
+        else
+            sprintf(valueStr, "%.2f", t->numberValue);
     }
 
-    printf(", line: %d }\n", t->line);
+    printf("| %-12s | %-20s | %-11s | %-6d |\n",
+        getTokenTypeString(t->type),
+        t->lexeme ? t->lexeme : "NULL",
+        valueStr,
+        t->line
+    );
 }
