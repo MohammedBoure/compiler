@@ -2,67 +2,50 @@
 #include <ctype.h>
 #include "lexer_utils.c"
 
-// exo6: Skip whitespace and comments, need simple rework
 // int skipWhitespaceAndComments(FILE* fp)
-char skipWhitespaceAndComments(FILE* fp, int* lineNumber) {
+int skipWhitespaceAndComments(FILE* fp) {
     int c;
-    int state = 0;  // for comment state: 0 = no comment, 1 = in /* */ comment
+    int lineNumber = 0;
+    int state = 0; 
 
     while ((c = fgetc(fp)) != EOF) {
-        if (c == ' ' || c == '\t') {
+        if (c == ' ' || c == '\t')
             continue;
-        }
-
         if (c == '\n') {
-            (*lineNumber)++;
+            lineNumber++;
             continue;
         }
-
-        if (c == '/' && !state) {
+        if (c == '/') {
             int next = fgetc(fp);
             if (next == '/') {
-                while ((c = fgetc(fp)) != EOF && c != '\n') {
-                }
-                if (c == '\n') {
-                    (*lineNumber)++;
+                while ((c = fgetc(fp)) != EOF && c != '\n') {}
+                if (c == '\n') lineNumber++;
+                continue;
+            } 
+            else if (next == '*') {
+                state = 1;
+                while (state && (c = fgetc(fp)) != EOF) {
+                    if (c == '\n') lineNumber++;
+                    else if (c == '*') {
+                        int maybeEnd = fgetc(fp);
+                        if (maybeEnd == '/')
+                            state = 0;
+                        else
+                            ungetc(maybeEnd, fp);
+                    }
                 }
                 continue;
-            } else {
+            } 
+            else {
                 ungetc(next, fp);
-                return '/';
+                ungetc(c, fp);
+                break;
             }
         }
-
-        if (c == '/' && !state) {
-            int next = fgetc(fp);
-            if (next == '*') {
-                state = 1;  
-                continue;
-            } else {
-                ungetc(next, fp);
-                return '/';
-            }
-        }
-
-        if (state == 1) {
-            if (c == '\n') {
-                (*lineNumber)++;
-            } else if (c == '*') {
-                int next = fgetc(fp);
-                if (next == '/') {
-                    state = 0; 
-                    continue;
-                } else {
-                    ungetc(next, fp);
-                }
-            }
-            continue;
-        }
-
-        return c;
+        ungetc(c, fp);
+        break;
     }
-
-    return EOF;
+    return lineNumber;
 }
 
 
@@ -129,30 +112,37 @@ Token getNextToken(FILE* file) {
 
 //exo12
 int main(int argc, char *argv[]) {
-    // compile with gcc lexer.c -o lexer
-    // run with lexer filename
-
-    // Warning: token type printing isnt implemented yet
-
-    if (argc == 1){ printf("provide filename as a command line argument\n");}
+    if (argc == 1){ 
+        printf("provide filename as a command line argument\n");
+        return 0; 
+    }
 
     FILE *file = fopen(argv[1], "r");
-    if (file==NULL){
-        fprintf(stderr,"Cannot open file: '%s'.\n",argv[1]);
+    if (file == NULL){
+        fprintf(stderr, "Cannot open file: '%s'.\n", argv[1]);
         return 1;
     }
 
-    printf("Warning: Token type printing not implemented yet.\n");
-    printf("Line | Lexeme          | Token Type   | Value\n");
-    printf("-----------------------------------------------\n");
-    for (Token t = getNextToken(file); t.type != TOKEN_EOF; t = getNextToken(file)) {
-        if (t.type == TOKEN_NUMBER)
-            printf("%4d | %-15s | %-12s | %.2f\n", t.line, t.lexeme, "idk", t.numberValue);
-        else
-            printf("%4d | %-15s | %-12s | -\n", t.line, t.lexeme, "idk");
-    }
+    printf("--- Lexing file: %s ---\n", argv[1]);
+    printTokenHeader();
+    
+    Token t;
+    do {
+        t = getNextToken(file);
+        
+        printToken(&t); 
+
+        if (t.lexeme != NULL) {
+            free(t.lexeme);
+            t.lexeme = NULL;
+        }
+        
+    } while (t.type != TOKEN_EOF);
+
+    printTokenFooter();
 
     fclose(file);
     return 0;
 }
+
 
