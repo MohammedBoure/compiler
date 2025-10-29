@@ -171,43 +171,129 @@ Token recognizeNumber(FILE* fp, char firstChar, int line){
 
 // exo9: Recognize operators and delimiters
 Token recognizeOperatorOrDelimiter(FILE* fp, char firstChar, int line){
-    todo(__func__);
+    if (isOperatorChar(firstChar)) {
+        size_t capacity = 8; 
+        char* lexeme = malloc(capacity);
+        lexeme[0] = firstChar;
+        size_t length = 1;
+
+        int c;
+        while (isOperatorChar(c = fgetc(fp))) {
+            if (length + 1 >= capacity) {
+                capacity *= 2;
+                lexeme = realloc(lexeme, capacity);
+            }
+            lexeme[length++] = c;
+        }
+        if (c != EOF) ungetc(c, fp); 
+
+        lexeme[length] = '\0';
+        return (Token){TOKEN_OPERATOR, lexeme, 0.0, line};
+    }
+    
+    char* symbols = "(){}[];,";
+    for (int i = 0; symbols[i] != '\0'; i++) {
+        if (firstChar == symbols[i]) {
+            char* lexeme = strdup(" ");
+            lexeme[0] = firstChar;
+            return (Token){TOKEN_SYMBOL, lexeme, 0.0, line};
+        }
+    }
+
+    char* lexeme = strdup(" ");
+    lexeme[0] = firstChar;
+    return (Token){TOKEN_UNKNOWN, lexeme, 0.0, line};
 }
 
 // exo10: Recognize strings and char literals
 Token recognizeStringOrChar(FILE* fp, char quote, int line){
-    todo(__func__);
+    size_t capacity = 64;
+    size_t length = 0;
+    char* buffer = malloc(capacity);
+
+    int c;
+    while ((c = fgetc(fp)) != EOF && c != quote) {
+        if (c == '\n') {
+            fprintf(stderr, "Lexer Error: Unterminated string on line %d.\n", line);
+            free(buffer);
+            return (Token){TOKEN_UNKNOWN, NULL, 0.0, line};
+        }
+        if (c == '\\') {
+            c = fgetc(fp); 
+            if (c == EOF) break;
+        }
+        if (length + 1 >= capacity) {
+            capacity *= 2;
+            buffer = realloc(buffer, capacity);
+        }
+        buffer[length++] = c;
+    }
+    if (c == EOF) {
+        fprintf(stderr, "Lexer Error: Unterminated string (EOF) on line %d.\n", line);
+        free(buffer);
+        return (Token){TOKEN_UNKNOWN, NULL, 0.0, line};
+    }
+    buffer[length] = '\0';
+    return (Token){TOKEN_STRING, buffer, 0.0, line};
 }
 
+static int currentLine = 1;
 //exo11
 Token getNextToken(FILE* file){
-  todo(__func__);
+  int c = skipWhitespaceAndComments(file, &currentLine);
+    int tokenLine = currentLine;
+    if (c == EOF) {
+        return (Token){TOKEN_EOF, strdup("EOF"), 0.0, tokenLine};
+    }
+
+    if (isIdentifierStart(c)) {
+        return recognizeIdentifierOrKeyword(file, c, tokenLine);
+    }
+
+    if (isdigit(c)) {
+        return recognizeNumber(file, c, tokenLine);
+    }
+    if (c == '.') {
+        int next = fgetc(file);
+        ungetc(next, file); 
+        if (isdigit(next)) {
+            return recognizeNumber(file, c, tokenLine);
+        }
+    }
+    if (c == '"' || c == '\'') {
+        return recognizeStringOrChar(file, c, tokenLine);
+    }
+
+    return recognizeOperatorOrDelimiter(file, c, tokenLine);
 }
 
 //exo12
-int main(int argc, char *argv[]) {
-    // compile with gcc lexer.c -o lexer
-    // run with lexer filename
-
-    // Warning: token type printing isnt implemented yet
-
-    if (argc == 1){ printf("provide filename as a command line argument\n");}
-
-    FILE *file = fopen(argv[1], "r");
-    if (file==NULL){
-        fprintf(stderr,"Cannot open file: '%s'.\n",argv[1]);
+int main(int argc, char *argv[]){
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
         return 1;
     }
 
-    printf("Warning: Token type printing not implemented yet.\n");
-    printf("Line | Lexeme          | Token Type   | Value\n");
-    printf("-----------------------------------------------\n");
-    for (Token t = getNextToken(file); t.type != TOKEN_EOF; t = getNextToken(file)) {
-        if (t.type == TOKEN_NUMBER)
-            printf("%4d | %-15s | %-12s | %.2f\n", t.line, t.lexeme, "idk", t.numberValue);
-        else
-            printf("%4d | %-15s | %-12s | -\n", t.line, t.lexeme, "idk");
+    FILE* file = fopen(argv[1], "r");
+    if (!file) {
+        fprintf(stderr, "Error: Could not open file '%s'\n", argv[1]);
+        return 1;
     }
+
+    printf("--- Lexing file: %s ---\n", argv[1]);
+
+    Token token;
+    do {
+        token = getNextToken(file);
+        printToken(&token);
+
+        if (token.lexeme) {
+            free(token.lexeme);
+        }
+
+    } while (token.type != TOKEN_EOF);
+
+    printf("--- End of file. ---\n");
 
     fclose(file);
     return 0;
