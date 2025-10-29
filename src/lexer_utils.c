@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 void todo(const char* caller_name){
     // Helper function for functions that arent implemented yet
@@ -88,3 +89,45 @@ int isOperatorChar(char c) {
     return 0;
 }
 
+
+const char* getTokenTypeString(TokenType type) {
+    switch (type) {
+        case TOKEN_IDENTIFIER: return "IDENTIFIER";
+        case TOKEN_KEYWORD:    return "KEYWORD";
+        case TOKEN_NUMBER:     return "NUMBER";
+        case TOKEN_OPERATOR:   return "OPERATOR";
+        case TOKEN_STRING:     return "STRING";
+        case TOKEN_EOF:        return "EOF";
+        case TOKEN_UNKNOWN:    return "UNKNOWN";
+        default:               return "UNKNOWN";
+    }
+}
+
+void printTokenHeader() {
+    printf("+--------------+----------------------+-------------+--------+\n");
+    printf("| Type         | Lexeme               | Value       | Line   |\n");
+    printf("+--------------+----------------------+-------------+--------+\n");
+}
+
+void printTokenFooter() {
+    printf("+--------------+----------------------+-------------+--------+\n");
+}
+
+
+void printToken(const Token* t) {
+    char valueStr[32] = "-";
+
+    if (t->type == TOKEN_NUMBER) {
+        if (fmod(t->numberValue, 1.0) == 0.0) // for test if integer
+            sprintf(valueStr, "%d", (int)t->numberValue); 
+        else
+            sprintf(valueStr, "%.2f", t->numberValue);
+    }
+
+    printf("| %-12s | %-20s | %-11s | %-6d |\n",
+        getTokenTypeString(t->type),
+        t->lexeme ? t->lexeme : "NULL",
+        valueStr,
+        t->line
+    );
+}
