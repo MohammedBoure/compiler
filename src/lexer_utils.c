@@ -63,6 +63,69 @@ int isKeyword(const char* word){
     return 0;
 }
 
+int isNumber(const char* s) {
+    if (s == NULL || *s == '\0')
+        return 0;
+
+    int i = 0;
+    int hasDecimal = 0;
+
+    // Optional leading sign
+    if (s[i] == '+' || s[i] == '-')
+        i++;
+
+    // Must contain at least one digit
+    int hasDigit = 0;
+
+    for (; s[i] != '\0'; i++) {
+        if (isdigit((unsigned char)s[i])) {
+            hasDigit = 1;
+            continue;
+        }
+        if (s[i] == '.') {
+            if (hasDecimal)  // second dot ⇒ invalid number
+                return 0;
+            hasDecimal = 1;
+            continue;
+        }
+        // Invalid character for a number
+        return 0;
+    }
+
+    return hasDigit;
+}
+
+int isDelimiter(const char* s) {
+    static const char DELIMITERS[] = {
+        '(', ')', '{', '}', '[', ']', ';', ',', '.', ':'
+    };
+    int count = sizeof(DELIMITERS) / sizeof(DELIMITERS[0]);
+
+    if (s == NULL || strlen(s) != 1)
+        return 0;
+
+    for (int i = 0; i < count; i++) {
+        if (s[0] == DELIMITERS[i])
+            return 1;
+    }
+    return 0;
+}
+
+
+int isOperator(const char* s) {
+    static const char* OPERATORS[] = {
+        "+", "-", "*", "/", "%", "=", "==", "!=", "<", "<=", ">", ">=",
+        "++", "--", "+=", "-=", "*=", "/=", "&&", "||", "!"
+    };
+    int count = sizeof(OPERATORS) / sizeof(OPERATORS[0]);
+
+    for (int i = 0; i < count; i++) {
+        if (strcmp(s, OPERATORS[i]) == 0)
+            return 1;
+    }
+    return 0;
+}
+
 // exo4
 int isIdentifierStart(char c){
     return ( (c >= 'A' && c <= 'Z') ||

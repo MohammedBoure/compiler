@@ -49,15 +49,6 @@ int skipWhitespaceAndComments(FILE* fp) {
 }
 
 
-
-// simple string recognition functions
-int isKeyword(const char* s);
-int isNumber(const char* s);
-int isOperator(const char* s);
-int isDelimiter(const char* s);
-
-
-
 //exo11
 Token getNextToken(FILE* file) {
     static int line = 1;
