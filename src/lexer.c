@@ -52,51 +52,50 @@ int skipWhitespaceAndComments(FILE* fp) {
 //exo11
 Token getNextToken(FILE* file) {
     static int line = 1;
-    Token token;
 
     // Skip comments,spaces and update line count
     line += skipWhitespaceAndComments(file);
+
+    Token token;
+    token.line = line;
 
     // check EOF
     int c = fgetc(file);
     if (c == EOF) {
         token.type = TOKEN_EOF;
-        token.line = line;
         token.lexeme = strdup("");
         return token;
     }
 
-    // Read lexeme until token boundary
+    // --- Lexeme construction ---
     char buffer[256];
     int i = 0;
+
     buffer[i++] = c;
 
+    // if string literal
     if (c == '"') {
-        buffer[i++] = c;
         while ((c = fgetc(file)) != EOF && c != '"') {
             if (c == '\n') {
-                // Strings cannot span multiple lines (in basic lexer)
                 fprintf(stderr, "Error: Unterminated string at line %d\n", line);
                 break;
             }
-            buffer[i++] = c;
-            if (i >= sizeof(buffer) - 2) break; // avoid overflow
+            if (i < sizeof(buffer) - 2)
+                buffer[i++] = c;
         }
-        buffer[i++] = '"'; 
     }
 
-    while ((c = fgetc(file)) != EOF) {
-        char s[2] = {c, 0};
-        if (isspace(c) || isOperator(s) || isDelimiter(s)) {
-            ungetc(c, file); // stop at token boundary
-            break;
+    else {
+        while ((c = fgetc(file)) != EOF && (isalnum(c) || c == '_')) {
+            if (i < sizeof(buffer) - 2)
+                buffer[i++] = c;
         }
-        buffer[i++] = c;
+        if (c != EOF)
+            ungetc(c, file);
     }
+
     buffer[i] = '\0';
-
     token.lexeme = strdup(buffer);
-    token.line = line;
 
     // Determine token type using helper functions
     if (isKeyword(token.lexeme)) {
