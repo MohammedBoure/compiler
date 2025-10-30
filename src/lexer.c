@@ -84,6 +84,8 @@ Token getNextToken(FILE* file) {
             if (i < sizeof(buffer) - 2)
                 buffer[i++] = c;
         }
+        if (c == '"' && i < sizeof(buffer) - 1)
+            buffer[i++] = '"';
     }
     else if (c == '\'') {
         while ((c = fgetc(file)) != EOF && c != '\'') {
