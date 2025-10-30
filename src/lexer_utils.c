@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
+#include <ctype.h>
 
 void todo(const char* caller_name){
     // Helper function for functions that arent implemented yet
@@ -9,6 +9,16 @@ void todo(const char* caller_name){
     // always pass __func__ to it
     fprintf(stderr,"Function: '%s' is not implimented yet, Exiting..\n",caller_name);
     exit(74);
+}
+
+double myFmod(double x, double y) {
+    if (y == 0.0) {
+        fprintf(stderr, "Error: Division by zero in myFmod\n");
+        exit(1);
+    }
+    
+    int quotient = (int)(x / y);
+    return x - quotient * y;  
 }
 
 /*
@@ -24,6 +34,7 @@ void todo(const char* caller_name){
  - TOKEN_NUMBER     : numeric literals (ℝ or ℤ)
  - TOKEN_OPERATOR   : arithmetic/logical operators
  - TOKEN_STRING     : string literals ("...")
+ - TOKEN_CHAR       : character literals ('a')
  - TOKEN_SYMBOL     : punctuation symbols (;, (), {})
  - TOKEN_EOF        : end-of-file marker
  - TOKEN_UNKNOWN    : undefined or invalid token
@@ -38,6 +49,7 @@ typedef enum {
     TOKEN_NUMBER,
     TOKEN_OPERATOR,
     TOKEN_STRING,
+    TOKEN_CHAR,
     TOKEN_SYMBOL,
     TOKEN_EOF,
     TOKEN_UNKNOWN
@@ -51,8 +63,19 @@ typedef struct {
     int line;
 } Token;
 
-const char *Keywords[] = {"int", "if", "else", "while", "return"};
-const int KeywordCount = 5;
+const char *Keywords[] = {
+    "int", "float", "double", "char", "void", "short", "long", "signed", "unsigned",
+
+    "if", "else", "switch", "case", "default",
+    "while", "do", "for", "break", "continue", "return",
+
+    "const", "static", "typedef",
+
+    "struct", "union", "enum",
+
+    "sizeof", 
+};
+const int KeywordCount = sizeof(Keywords) / sizeof(Keywords[0]);
 
 // exo3
 int isKeyword(const char* word){
@@ -60,6 +83,98 @@ int isKeyword(const char* word){
         if (strcmp(word, Keywords[i]) == 0)
             return 1;
     }
+    return 0;
+}
+
+int isNumber(const char* s) {
+    if (s == NULL || *s == '\0')
+        return 0;
+
+    int i = 0;
+    int hasDecimal = 0;
+
+    // Optional leading sign
+    if (s[i] == '+' || s[i] == '-')
+        i++;
+
+    // Must contain at least one digit
+    int hasDigit = 0;
+
+    for (; s[i] != '\0'; i++) {
+        if (isdigit((unsigned char)s[i])) {
+            hasDigit = 1;
+            continue;
+        }
+        if (s[i] == '.') {
+            if (hasDecimal)  // second dot ⇒ invalid number
+                return 0;
+            hasDecimal = 1;
+            continue;
+        }
+        return 0;
+    }
+
+    return hasDigit;
+}
+
+int isDelimiter(const char* s) {
+    static const char DELIMITERS[] = {
+        '(', ')', '{', '}', '[', ']', ';', ',', '.', ':'
+    };
+    int count = sizeof(DELIMITERS) / sizeof(DELIMITERS[0]);
+
+    if (s == NULL || strlen(s) != 1)
+        return 0;
+
+    for (int i = 0; i < count; i++) {
+        if (s[0] == DELIMITERS[i])
+            return 1;
+    }
+    return 0;
+}
+
+
+int isOperator(const char* s) {
+    static const char* OPERATORS[] = {
+        "+", "-", "*", "/", "%", "=", "==", "!=", "<", "<=", ">", ">=",
+        "++", "--", "+=", "-=", "*=", "/=", "&&", "||", "!"
+    };
+    int count = sizeof(OPERATORS) / sizeof(OPERATORS[0]);
+
+    for (int i = 0; i < count; i++) {
+        if (strcmp(s, OPERATORS[i]) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+int isString(const char* s) {
+    if (s == NULL)
+        return 0;
+
+    size_t len = strlen(s);
+
+    if (len < 2)
+        return 0;
+
+    if (s[0] == '"' && s[len - 1] == '"')
+        return 1;
+
+    return 0;
+}
+
+int isChar(const char* s) {
+    if (s == NULL)
+        return 0;
+
+    size_t len = strlen(s);
+
+    if (len != 3)
+        return 0;
+
+    if (s[0] == '\'' && s[2] == '\'')
+        return 1;
+
     return 0;
 }
 
@@ -78,6 +193,21 @@ int isIdentifierChar(char c){
              (c == '_') );
 }
 
+int isIdentifier(const char* word) {
+    if (word == NULL || *word == '\0')
+        return 0;
+
+    if (!isIdentifierStart(word[0]))
+        return 0;
+
+    for (int i = 1; word[i] != '\0'; i++) {
+        if (!isIdentifierChar(word[i]))
+            return 0;
+    }
+
+    return 1;
+}
+
 // exo5
 static const char OPERATOR_CHARS[] = "+-*/=< >!";
 int isOperatorChar(char c) {
@@ -93,10 +223,12 @@ int isOperatorChar(char c) {
 const char* getTokenTypeString(TokenType type) {
     switch (type) {
         case TOKEN_IDENTIFIER: return "IDENTIFIER";
+        case TOKEN_SYMBOL: return "DELIMITER";
         case TOKEN_KEYWORD:    return "KEYWORD";
         case TOKEN_NUMBER:     return "NUMBER";
         case TOKEN_OPERATOR:   return "OPERATOR";
         case TOKEN_STRING:     return "STRING";
+        case TOKEN_CHAR:       return "CHAR";
         case TOKEN_EOF:        return "EOF";
         case TOKEN_UNKNOWN:    return "UNKNOWN";
         default:               return "UNKNOWN";
@@ -118,7 +250,7 @@ void printToken(const Token* t) {
     char valueStr[32] = "-";
 
     if (t->type == TOKEN_NUMBER) {
-        if (fmod(t->numberValue, 1.0) == 0.0) // for test if integer
+        if (myFmod(t->numberValue, 1.0) == 0.0) // for test if integer
             sprintf(valueStr, "%d", (int)t->numberValue); 
         else
             sprintf(valueStr, "%.2f", t->numberValue);

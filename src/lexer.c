@@ -1,215 +1,174 @@
 #include <stdio.h>
 #include <ctype.h>
-#include <stdlib.h>
 #include "lexer_utils.c"
 
-// exo6: Skip whitespace and comments
-char skipWhitespaceAndComments(FILE* fp, int* lineNumber) {
+// int skipWhitespaceAndComments(FILE* fp)
+int skipWhitespaceAndComments(FILE* fp) {
     int c;
-    int state = 0;  // for comment state: 0 = no comment, 1 = in /* */ comment
+    int lineNumber = 0;
+    int state = 0; 
 
     while ((c = fgetc(fp)) != EOF) {
-        if (c == ' ' || c == '\t') {
+        if (c == ' ' || c == '\t')
             continue;
-        }
-
         if (c == '\n') {
-            (*lineNumber)++;
+            lineNumber++;
             continue;
         }
-
-        if (c == '/' && !state) {
+        if (c == '/') {
             int next = fgetc(fp);
             if (next == '/') {
-                while ((c = fgetc(fp)) != EOF && c != '\n') {
-                }
-                if (c == '\n') {
-                    (*lineNumber)++;
+                while ((c = fgetc(fp)) != EOF && c != '\n') {}
+                if (c == '\n') lineNumber++;
+                continue;
+            } 
+            else if (next == '*') {
+                state = 1;
+                while (state && (c = fgetc(fp)) != EOF) {
+                    if (c == '\n') lineNumber++;
+                    else if (c == '*') {
+                        int maybeEnd = fgetc(fp);
+                        if (maybeEnd == '/')
+                            state = 0;
+                        else
+                            ungetc(maybeEnd, fp);
+                    }
                 }
                 continue;
-            } else {
+            } 
+            else {
                 ungetc(next, fp);
-                return '/';
+                ungetc(c, fp);
+                break;
             }
         }
-
-        if (c == '/' && !state) {
-            int next = fgetc(fp);
-            if (next == '*') {
-                state = 1;  
-                continue;
-            } else {
-                ungetc(next, fp);
-                return '/';
-            }
-        }
-
-        if (state == 1) {
-            if (c == '\n') {
-                (*lineNumber)++;
-            } else if (c == '*') {
-                int next = fgetc(fp);
-                if (next == '/') {
-                    state = 0; 
-                    continue;
-                } else {
-                    ungetc(next, fp);
-                }
-            }
-            continue;
-        }
-
-        return c;
-    }
-
-    return EOF;
-}
-
-// exo7: Recognize identifiers and keywords
-Token recognizeIdentifierOrKeyword(FILE* fp, char firstChar, int line){
-    size_t capacity = 32;
-    size_t length = 0;
-    char* lexeme = malloc(capacity);
-    if (!lexeme) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(1);
-    }
-
-    lexeme[length++] = firstChar;
-
-    int c;
-    // Continue reading while characters are valid for identifiers
-    while ((c = fgetc(fp)) != EOF && isIdentifierChar(c)) {
-        // Resize buffer if needed
-        if (length + 1 >= capacity) {
-            capacity *= 2;
-            lexeme = realloc(lexeme, capacity);
-            if (!lexeme) {
-                fprintf(stderr, "Memory reallocation failed\n");
-                exit(1);
-            }
-        }
-        lexeme[length++] = c;
-    }
-
-    lexeme[length] = '\0';
-
-    // Return the last non-identifier character to the stream
-    if (c != EOF) {
         ungetc(c, fp);
+        break;
     }
+    return lineNumber;
+}
 
-    Token token;
-    token.line = line;
-    token.lexeme = lexeme;
 
-    if (isKeyword(lexeme)) {
-        token.type = TOKEN_KEYWORD;
+TokenType determineTokenType(Token* token) {
+    if (isKeyword(token->lexeme)) {
+        return TOKEN_KEYWORD;
+    } else if (isNumber(token->lexeme)) {
+        token->numberValue = atof(token->lexeme);
+        return TOKEN_NUMBER;
+    } else if (isOperator(token->lexeme)) {
+        return TOKEN_OPERATOR;
+    } else if (isDelimiter(token->lexeme)) {
+        return TOKEN_SYMBOL;
+    } else if (isIdentifier(token->lexeme)) {
+        return TOKEN_IDENTIFIER;
+    } else if (isString(token->lexeme)) {
+        return TOKEN_STRING;
+    } else if (isChar(token->lexeme)) {
+        return TOKEN_CHAR;
     } else {
-        token.type = TOKEN_IDENTIFIER;
+        return TOKEN_UNKNOWN;
     }
-
-    token.numberValue = 0.0;  // not used for identifiers
-
-    return token;
-}
-
-// exo8: Recognize numbers
-Token recognizeNumber(FILE* fp, char firstChar, int line){
-    size_t capacity = 32;
-    size_t length = 0;
-    char* buffer = malloc(capacity);
-    if (!buffer) {
-        fprintf(stderr, "Memory allocation failed\n");
-        exit(1);
-    }
-
-    buffer[length++] = firstChar;
-
-    int c;
-    while ((c = fgetc(fp)) != EOF) {
-        if (isdigit(c) || c == '.' || c == 'e' || c == 'E' || c == '+' || c == '-') {
-            if (length + 1 >= capacity) {
-                capacity *= 2;
-                buffer = realloc(buffer, capacity);
-                if (!buffer) exit(1);
-            }
-            buffer[length++] = c;
-        } else {
-            ungetc(c, fp);
-            break;
-        }
-    }
-    buffer[length] = '\0';
-
-    char* endptr;
-    double value = strtod(buffer, &endptr);
-
-    if (endptr == buffer) {
-        free(buffer);
-        Token t = { .type = TOKEN_UNKNOWN, .lexeme = NULL, .line = line };
-        return t;
-    }
-
-    while (endptr < buffer + length) {
-        ungetc(*(endptr++), fp);
-    }
-
-    size_t valid_len = endptr - buffer;
-    buffer[valid_len] = '\0';
-    buffer = realloc(buffer, valid_len + 1);  
-
-    Token token = {
-        .type = TOKEN_NUMBER,
-        .lexeme = buffer,
-        .numberValue = value,
-        .line = line
-    };
-
-    return token;
-}
-
-// exo9: Recognize operators and delimiters
-Token recognizeOperatorOrDelimiter(FILE* fp, char firstChar, int line){
-    todo(__func__);
-}
-
-// exo10: Recognize strings and char literals
-Token recognizeStringOrChar(FILE* fp, char quote, int line){
-    todo(__func__);
 }
 
 //exo11
-Token getNextToken(FILE* file){
-  todo(__func__);
+Token getNextToken(FILE* file) {
+    static int line = 1;
+
+    // Skip comments,spaces and update line count
+    line += skipWhitespaceAndComments(file);
+
+    Token token;
+    token.line = line;
+
+    // check EOF
+    int c = fgetc(file);
+    if (c == EOF) {
+        token.type = TOKEN_EOF;
+        token.lexeme = strdup("");
+        return token;
+    }
+
+    // --- Lexeme construction ---
+    char buffer[256];
+    int i = 0;
+
+    buffer[i++] = c;
+    
+
+    // if string literal
+    if (c == '"') {
+        while ((c = fgetc(file)) != EOF && c != '"') {
+            if (c == '\n') {
+                fprintf(stderr, "Error: Unterminated string at line %d\n", line);
+                break;
+            }
+            if (i < sizeof(buffer) - 2)
+                buffer[i++] = c;
+        }
+        if (c == '"' && i < sizeof(buffer) - 1)
+            buffer[i++] = '"';
+    }
+    else if (c == '\'') {
+        while ((c = fgetc(file)) != EOF && c != '\'') {
+            if (c == '\n') {
+                fprintf(stderr, "Error: Unterminated char at line %d\n", line);
+                break;
+            }
+            if (i < sizeof(buffer) - 2)
+                buffer[i++] = c;
+        }
+        buffer[i++] = '\''; // close quote
+    }
+    else if (isalpha(c) || c == '_') {
+        // identifier
+        while ((c = fgetc(file)) != EOF && (isalnum(c) || c == '_')) {
+            if (i < sizeof(buffer) - 2)
+                buffer[i++] = c;
+        }
+        if (c != EOF)
+            ungetc(c, file);
+    }
+
+    buffer[i] = '\0';
+    token.lexeme = strdup(buffer);
+
+    token.type = determineTokenType(&token);
+    return token;
 }
 
 //exo12
 int main(int argc, char *argv[]) {
-    // compile with gcc lexer.c -o lexer
-    // run with lexer filename
-
-    // Warning: token type printing isnt implemented yet
-
-    if (argc == 1){ printf("provide filename as a command line argument\n");}
+    if (argc == 1){ 
+        printf("provide filename as a command line argument\n");
+        return 0; 
+    }
 
     FILE *file = fopen(argv[1], "r");
-    if (file==NULL){
-        fprintf(stderr,"Cannot open file: '%s'.\n",argv[1]);
+    if (file == NULL){
+        fprintf(stderr, "Cannot open file: '%s'.\n", argv[1]);
         return 1;
     }
 
-    printf("Warning: Token type printing not implemented yet.\n");
-    printf("Line | Lexeme          | Token Type   | Value\n");
-    printf("-----------------------------------------------\n");
-    for (Token t = getNextToken(file); t.type != TOKEN_EOF; t = getNextToken(file)) {
-        if (t.type == TOKEN_NUMBER)
-            printf("%4d | %-15s | %-12s | %.2f\n", t.line, t.lexeme, "idk", t.numberValue);
-        else
-            printf("%4d | %-15s | %-12s | -\n", t.line, t.lexeme, "idk");
-    }
+    printf("--- Lexing file: %s ---\n", argv[1]);
+    printTokenHeader();
+    
+    Token t;
+    do {
+        t = getNextToken(file);
+        
+        printToken(&t); 
+
+        if (t.lexeme != NULL) {
+            free(t.lexeme);
+            t.lexeme = NULL;
+        }
+        
+    } while (t.type != TOKEN_EOF);
+
+    printTokenFooter();
 
     fclose(file);
     return 0;
 }
+
 
