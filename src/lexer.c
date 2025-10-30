@@ -49,6 +49,27 @@ int skipWhitespaceAndComments(FILE* fp) {
 }
 
 
+TokenType determineTokenType(Token* token) {
+    if (isKeyword(token->lexeme)) {
+        return TOKEN_KEYWORD;
+    } else if (isNumber(token->lexeme)) {
+        token->numberValue = atof(token->lexeme);
+        return TOKEN_NUMBER;
+    } else if (isOperator(token->lexeme)) {
+        return TOKEN_OPERATOR;
+    } else if (isDelimiter(token->lexeme)) {
+        return TOKEN_SYMBOL;
+    } else if (isIdentifier(token->lexeme)) {
+        return TOKEN_IDENTIFIER;
+    } else if (isString(token->lexeme)) {
+        return TOKEN_STRING;
+    } else if (isChar(token->lexeme)) {
+        return TOKEN_CHAR;
+    } else {
+        return TOKEN_UNKNOWN;
+    }
+}
+
 //exo11
 Token getNextToken(FILE* file) {
     static int line = 1;
@@ -111,26 +132,7 @@ Token getNextToken(FILE* file) {
     buffer[i] = '\0';
     token.lexeme = strdup(buffer);
 
-    // Determine token type using helper functions
-    if (isKeyword(token.lexeme)) {
-        token.type = TOKEN_KEYWORD;
-    } else if (isNumber(token.lexeme)) {
-        token.type = TOKEN_NUMBER;
-        token.numberValue = atof(token.lexeme);
-    } else if (isOperator(token.lexeme)) {
-        token.type = TOKEN_OPERATOR;
-    } else if (isDelimiter(token.lexeme)) {
-        token.type = TOKEN_SYMBOL;
-    } else if (isIdentifier(token.lexeme)) {
-        token.type = TOKEN_IDENTIFIER;
-    } else if (isString(token.lexeme)) {
-        token.type = TOKEN_STRING;
-    } else if (isChar(token.lexeme)) {
-        token.type = TOKEN_CHAR;
-    } else {
-        token.type = TOKEN_UNKNOWN;
-    }
-
+    token.type = determineTokenType(&token);
     return token;
 }
 
