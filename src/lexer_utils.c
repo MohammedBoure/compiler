@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
 #include <ctype.h>
 
 void todo(const char* caller_name){
@@ -10,6 +9,16 @@ void todo(const char* caller_name){
     // always pass __func__ to it
     fprintf(stderr,"Function: '%s' is not implimented yet, Exiting..\n",caller_name);
     exit(74);
+}
+
+double myFmod(double x, double y) {
+    if (y == 0.0) {
+        fprintf(stderr, "Error: Division by zero in myFmod\n");
+        exit(1);
+    }
+    
+    int quotient = (int)(x / y);
+    return x - quotient * y;  
 }
 
 /*
@@ -223,7 +232,7 @@ void printToken(const Token* t) {
     char valueStr[32] = "-";
 
     if (t->type == TOKEN_NUMBER) {
-        if (fmod(t->numberValue, 1.0) == 0.0) // for test if integer
+        if (myFmod(t->numberValue, 1.0) == 0.0) // for test if integer
             sprintf(valueStr, "%d", (int)t->numberValue); 
         else
             sprintf(valueStr, "%.2f", t->numberValue);
