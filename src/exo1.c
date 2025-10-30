@@ -20,8 +20,15 @@ int count_lines_from_file(const char* file_name){
 
     int number_lines = 0;
     int c;
+    int prev_char = 0;
+    
     while ((c = fgetc(file)) != EOF){
         if (c == '\n') number_lines++;
+        prev_char = c;
+    }
+
+    if (prev_char != '\n' && prev_char != 0) {
+        number_lines++;
     }
 
     fclose(file);
