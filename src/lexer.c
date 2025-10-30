@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
     // lexer <input> -o <output>
     
     if (argc == 1){ 
-        printf("provide filename as a command line argument\n");
+        fprintf(stderr,"provide filename as a command line argument\nUsage: lexer input.c [-o output]");
         return 0; 
     }
 

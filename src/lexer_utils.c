@@ -86,6 +86,49 @@ int isKeyword(const char* word){
     return 0;
 }
 
+// exo4
+int isIdentifierStart(char c){
+    return ( (c >= 'A' && c <= 'Z') ||
+             (c >= 'a' && c <= 'z') ||
+             (c == '_') );
+}
+
+// exo4
+int isIdentifierChar(char c){
+    return ( (c >= 'A' && c <= 'Z') ||
+             (c >= 'a' && c <= 'z') ||
+             (c >= '0' && c <= '9') ||
+             (c == '_') );
+}
+
+// exo5
+static const char OPERATOR_CHARS[] = "+-*/=< >!";
+int isOperatorChar(char c) {
+    for (int i = 0; OPERATOR_CHARS[i] != '\0'; i++) {
+        if (c == OPERATOR_CHARS[i]) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// exo7
+int isIdentifier(const char* word) {
+    if (word == NULL || *word == '\0')
+        return 0;
+
+    if (!isIdentifierStart(word[0]))
+        return 0;
+
+    for (int i = 1; word[i] != '\0'; i++) {
+        if (!isIdentifierChar(word[i]))
+            return 0;
+    }
+
+    return 1;
+}
+
+// exo8
 int isNumber(const char* s) {
     if (s == NULL || *s == '\0')
         return 0;
@@ -117,6 +160,22 @@ int isNumber(const char* s) {
     return hasDigit;
 }
 
+// exo9
+int isOperator(const char* s) {
+    static const char* OPERATORS[] = {
+        "+", "-", "*", "/", "%", "=", "==", "!=", "<", "<=", ">", ">=",
+        "++", "--", "+=", "-=", "*=", "/=", "&&", "||", "!" , "&", "|", "~", "<<", ">>"
+    };
+    int count = sizeof(OPERATORS) / sizeof(OPERATORS[0]);
+
+    for (int i = 0; i < count; i++) {
+        if (strcmp(s, OPERATORS[i]) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+// exo9
 int isDelimiter(const char* s) {
     static const char DELIMITERS[] = {
         '(', ')', '{', '}', '[', ']', ';', ',', '.', ':'
@@ -133,21 +192,7 @@ int isDelimiter(const char* s) {
     return 0;
 }
 
-
-int isOperator(const char* s) {
-    static const char* OPERATORS[] = {
-        "+", "-", "*", "/", "%", "=", "==", "!=", "<", "<=", ">", ">=",
-        "++", "--", "+=", "-=", "*=", "/=", "&&", "||", "!" , "&", "|", "~", "<<", ">>"
-    };
-    int count = sizeof(OPERATORS) / sizeof(OPERATORS[0]);
-
-    for (int i = 0; i < count; i++) {
-        if (strcmp(s, OPERATORS[i]) == 0)
-            return 1;
-    }
-    return 0;
-}
-
+// exo10
 int isString(const char* s) {
     if (s == NULL)
         return 0;
@@ -163,6 +208,7 @@ int isString(const char* s) {
     return 0;
 }
 
+// exo10
 int isChar(const char* s) {
     if (s == NULL)
         return 0;
@@ -178,46 +224,6 @@ int isChar(const char* s) {
     return 0;
 }
 
-// exo4
-int isIdentifierStart(char c){
-    return ( (c >= 'A' && c <= 'Z') ||
-             (c >= 'a' && c <= 'z') ||
-             (c == '_') );
-}
-
-// exo4
-int isIdentifierChar(char c){
-    return ( (c >= 'A' && c <= 'Z') ||
-             (c >= 'a' && c <= 'z') ||
-             (c >= '0' && c <= '9') ||
-             (c == '_') );
-}
-
-int isIdentifier(const char* word) {
-    if (word == NULL || *word == '\0')
-        return 0;
-
-    if (!isIdentifierStart(word[0]))
-        return 0;
-
-    for (int i = 1; word[i] != '\0'; i++) {
-        if (!isIdentifierChar(word[i]))
-            return 0;
-    }
-
-    return 1;
-}
-
-// exo5
-static const char OPERATOR_CHARS[] = "+-*/=< >!";
-int isOperatorChar(char c) {
-    for (int i = 0; OPERATOR_CHARS[i] != '\0'; i++) {
-        if (c == OPERATOR_CHARS[i]) {
-            return 1;
-        }
-    }
-    return 0;
-}
 
 
 const char* getTokenTypeString(TokenType type) {
