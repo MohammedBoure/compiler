@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 void todo(const char* caller_name){
     // Helper function for functions that arent implemented yet
@@ -51,8 +52,19 @@ typedef struct {
     int line;
 } Token;
 
-const char *Keywords[] = {"int", "if", "else", "while", "return"};
-const int KeywordCount = 5;
+const char *Keywords[] = {
+    "int", "float", "double", "char", "void", "short", "long", "signed", "unsigned",
+
+    "if", "else", "switch", "case", "default",
+    "while", "do", "for", "break", "continue", "return",
+
+    "const", "static", "typedef",
+
+    "struct", "union", "enum",
+
+    "sizeof", 
+};
+const int KeywordCount = sizeof(Keywords) / sizeof(Keywords[0]);
 
 // exo3
 int isKeyword(const char* word){
@@ -60,6 +72,83 @@ int isKeyword(const char* word){
         if (strcmp(word, Keywords[i]) == 0)
             return 1;
     }
+    return 0;
+}
+
+int isNumber(const char* s) {
+    if (s == NULL || *s == '\0')
+        return 0;
+
+    int i = 0;
+    int hasDecimal = 0;
+
+    // Optional leading sign
+    if (s[i] == '+' || s[i] == '-')
+        i++;
+
+    // Must contain at least one digit
+    int hasDigit = 0;
+
+    for (; s[i] != '\0'; i++) {
+        if (isdigit((unsigned char)s[i])) {
+            hasDigit = 1;
+            continue;
+        }
+        if (s[i] == '.') {
+            if (hasDecimal)  // second dot ⇒ invalid number
+                return 0;
+            hasDecimal = 1;
+            continue;
+        }
+        return 0;
+    }
+
+    return hasDigit;
+}
+
+int isDelimiter(const char* s) {
+    static const char DELIMITERS[] = {
+        '(', ')', '{', '}', '[', ']', ';', ',', '.', ':'
+    };
+    int count = sizeof(DELIMITERS) / sizeof(DELIMITERS[0]);
+
+    if (s == NULL || strlen(s) != 1)
+        return 0;
+
+    for (int i = 0; i < count; i++) {
+        if (s[0] == DELIMITERS[i])
+            return 1;
+    }
+    return 0;
+}
+
+
+int isOperator(const char* s) {
+    static const char* OPERATORS[] = {
+        "+", "-", "*", "/", "%", "=", "==", "!=", "<", "<=", ">", ">=",
+        "++", "--", "+=", "-=", "*=", "/=", "&&", "||", "!"
+    };
+    int count = sizeof(OPERATORS) / sizeof(OPERATORS[0]);
+
+    for (int i = 0; i < count; i++) {
+        if (strcmp(s, OPERATORS[i]) == 0)
+            return 1;
+    }
+    return 0;
+}
+
+int isString(const char* s) {
+    if (s == NULL)
+        return 0;
+
+    size_t len = strlen(s);
+
+    if (len < 2)
+        return 0;
+
+    if (s[0] == '"' && s[len - 1] == '"')
+        return 1;
+
     return 0;
 }
 
@@ -76,6 +165,21 @@ int isIdentifierChar(char c){
              (c >= 'a' && c <= 'z') ||
              (c >= '0' && c <= '9') ||
              (c == '_') );
+}
+
+int isIdentifier(const char* word) {
+    if (word == NULL || *word == '\0')
+        return 0;
+
+    if (!isIdentifierStart(word[0]))
+        return 0;
+
+    for (int i = 1; word[i] != '\0'; i++) {
+        if (!isIdentifierChar(word[i]))
+            return 0;
+    }
+
+    return 1;
 }
 
 // exo5
