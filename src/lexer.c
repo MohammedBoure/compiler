@@ -61,6 +61,8 @@ Token getNextToken(FILE* file) {
     int c = fgetc(file);
     if (c == EOF) {
         token.type = TOKEN_EOF;
+        token.line = line;
+        token.lexeme = strdup("");
         return token;
     }
 
@@ -106,7 +108,7 @@ Token getNextToken(FILE* file) {
         token.type = TOKEN_OPERATOR;
     } else if (isDelimiter(token.lexeme)) {
         token.type = TOKEN_SYMBOL;
-    } else if (isIdentifier(token.lexeme)) {  // fallback
+    } else if (isIdentifier(token.lexeme)) {
         token.type = TOKEN_IDENTIFIER;
     } else if (isString(token.lexeme)) {
         token.type = TOKEN_STRING;

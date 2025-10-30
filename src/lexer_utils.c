@@ -197,6 +197,7 @@ int isOperatorChar(char c) {
 const char* getTokenTypeString(TokenType type) {
     switch (type) {
         case TOKEN_IDENTIFIER: return "IDENTIFIER";
+        case TOKEN_SYMBOL: return "DELIMITER";
         case TOKEN_KEYWORD:    return "KEYWORD";
         case TOKEN_NUMBER:     return "NUMBER";
         case TOKEN_OPERATOR:   return "OPERATOR";
