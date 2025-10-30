@@ -106,7 +106,6 @@ Token getNextToken(FILE* file) {
         }
         if (c != EOF)
             ungetc(c, file);
-        buffer[i] = '\0';
     }
 
     buffer[i] = '\0';
