@@ -72,6 +72,7 @@ Token getNextToken(FILE* file) {
     int i = 0;
 
     buffer[i++] = c;
+    
 
     // if string literal
     if (c == '"') {
@@ -84,7 +85,18 @@ Token getNextToken(FILE* file) {
                 buffer[i++] = c;
         }
     }
-
+    else if (c == '\'') {
+        while ((c = fgetc(file)) != EOF && c != '\'') {
+            if (c == '\n') {
+                fprintf(stderr, "Error: Unterminated char at line %d\n", line);
+                break;
+            }
+            if (i < sizeof(buffer) - 2)
+                buffer[i++] = c;
+        }
+        buffer[i++] = '\''; // close quote
+        buffer[i] = '\0';
+    }
     else {
         while ((c = fgetc(file)) != EOF && (isalnum(c) || c == '_')) {
             if (i < sizeof(buffer) - 2)
@@ -111,6 +123,8 @@ Token getNextToken(FILE* file) {
         token.type = TOKEN_IDENTIFIER;
     } else if (isString(token.lexeme)) {
         token.type = TOKEN_STRING;
+    } else if (isChar(token.lexeme)) {
+        token.type = TOKEN_CHAR;
     } else {
         token.type = TOKEN_UNKNOWN;
     }

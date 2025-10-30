@@ -34,6 +34,7 @@ double myFmod(double x, double y) {
  - TOKEN_NUMBER     : numeric literals (ℝ or ℤ)
  - TOKEN_OPERATOR   : arithmetic/logical operators
  - TOKEN_STRING     : string literals ("...")
+ - TOKEN_CHAR       : character literals ('a')
  - TOKEN_SYMBOL     : punctuation symbols (;, (), {})
  - TOKEN_EOF        : end-of-file marker
  - TOKEN_UNKNOWN    : undefined or invalid token
@@ -48,6 +49,7 @@ typedef enum {
     TOKEN_NUMBER,
     TOKEN_OPERATOR,
     TOKEN_STRING,
+    TOKEN_CHAR,
     TOKEN_SYMBOL,
     TOKEN_EOF,
     TOKEN_UNKNOWN
@@ -161,6 +163,21 @@ int isString(const char* s) {
     return 0;
 }
 
+int isChar(const char* s) {
+    if (s == NULL)
+        return 0;
+
+    size_t len = strlen(s);
+
+    if (len != 3)
+        return 0;
+
+    if (s[0] == '\'' && s[2] == '\'')
+        return 1;
+
+    return 0;
+}
+
 // exo4
 int isIdentifierStart(char c){
     return ( (c >= 'A' && c <= 'Z') ||
@@ -211,6 +228,7 @@ const char* getTokenTypeString(TokenType type) {
         case TOKEN_NUMBER:     return "NUMBER";
         case TOKEN_OPERATOR:   return "OPERATOR";
         case TOKEN_STRING:     return "STRING";
+        case TOKEN_CHAR:       return "CHAR";
         case TOKEN_EOF:        return "EOF";
         case TOKEN_UNKNOWN:    return "UNKNOWN";
         default:               return "UNKNOWN";
