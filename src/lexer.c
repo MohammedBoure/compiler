@@ -97,9 +97,9 @@ Token getNextToken(FILE* file) {
                 buffer[i++] = c;
         }
         buffer[i++] = '\''; // close quote
-        buffer[i] = '\0';
     }
-    else {
+    else if (isalpha(c) || c == '_') {
+        // identifier
         while ((c = fgetc(file)) != EOF && (isalnum(c) || c == '_')) {
             if (i < sizeof(buffer) - 2)
                 buffer[i++] = c;
