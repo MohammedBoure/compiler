@@ -1,4 +1,16 @@
-azeaze
-azeazea
-zeazeaze
-azeazeza
+int a = 5;
+float b = 3.14;
+char c = 'X';
+string msg = "Hello, world!";
+
+if (a < 10 && b >= 2.5) {
+    print(msg);
+    return 1;
+} else {
+    print("Condition failed");
+}
+
+/* This is a multi-line
+   comment example */
+
+a = a + 1; // Increment a
