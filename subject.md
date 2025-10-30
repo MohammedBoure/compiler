@@ -115,47 +115,47 @@ int main() {
 }
 ```
 
-#### Expected Tokens (Lexer Output)
-
-| Line | Lexeme       | Token Type  | Value     |
-|------|--------------|-------------|-----------|
-| 1    | `int`        | KEYWORD     | -         |
-| 1    | `main`       | IDENTIFIER  | -         |
-| 1    | `(`          | DELIMITER   | -         |
-| 1    | `)`          | DELIMITER   | -         |
-| 1    | `{`          | DELIMITER   | -         |
-| 2    | `int`        | KEYWORD     | -         |
-| 2    | `x`          | IDENTIFIER  | -         |
-| 2    | `=`          | OPERATOR    | -         |
-| 2    | `10`         | NUMBER      | 10        |
-| 2    | `;`          | DELIMITER   | -         |
-| 3    | `char`       | KEYWORD     | -         |
-| 3    | `c`          | IDENTIFIER  | -         |
-| 3    | `=`          | OPERATOR    | -         |
-| 3    | `'A'`        | CHAR_LIT    | A         |
-| 3    | `;`          | DELIMITER   | -         |
-| 4    | `if`         | KEYWORD     | -         |
-| 4    | `(`          | DELIMITER   | -         |
-| 4    | `x`          | IDENTIFIER  | -         |
-| 4    | `>`          | OPERATOR    | -         |
-| 4    | `0`          | NUMBER      | 0         |
-| 4    | `)`          | DELIMITER   | -         |
-| 4    | `{`          | DELIMITER   | -         |
-| 6    | `x`          | IDENTIFIER  | -         |
-| 6    | `=`          | OPERATOR    | -         |
-| 6    | `x`          | IDENTIFIER  | -         |
-| 6    | `-`          | OPERATOR    | -         |
-| 6    | `1`          | NUMBER      | 1         |
-| 6    | `;`          | DELIMITER   | -         |
-| 7    | `printf`     | IDENTIFIER  | -         |
-| 7    | `(`          | DELIMITER   | -         |
-| 7    | `"Hello World"` | STRING_LIT | Hello World |
-| 7    | `)`          | DELIMITER   | -         |
-| 7    | `;`          | DELIMITER   | -         |
-| 8    | `return`     | KEYWORD     | -         |
-| 8    | `c`          | IDENTIFIER  | -         |
-| 8    | `;`          | DELIMITER   | -         |
-| 9    | `}`          | DELIMITER   | -         |
-| 10   | `}`          | DELIMITER   | -         |
+#### Expected Tokens (Lexer Output)    
+    
+| Lexeme          | Token Type  | Value        | Line |
+|-----------------|-------------|--------------|------|
+| `int`           | KEYWORD     | -            | 1    |
+| `main`          | IDENTIFIER  | -            | 1    |
+| `(`             | DELIMITER   | -            | 1    |
+| `)`             | DELIMITER   | -            | 1    |
+| `{`             | DELIMITER   | -            | 1    |
+| `int`           | KEYWORD     | -            | 2    |
+| `x`             | IDENTIFIER  | -            | 2    |
+| `=`             | OPERATOR    | -            | 2    |
+| `10`            | NUMBER      | 10           | 2    |
+| `;`             | DELIMITER   | -            | 2    |
+| `char`          | KEYWORD     | -            | 3    |
+| `c`             | IDENTIFIER  | -            | 3    |
+| `=`             | OPERATOR    | -            | 3    |
+| `'A'`           | CHAR_LIT    | A            | 3    |
+| `;`             | DELIMITER   | -            | 3    |
+| `if`            | KEYWORD     | -            | 4    |
+| `(`             | DELIMITER   | -            | 4    |
+| `x`             | IDENTIFIER  | -            | 4    |
+| `>`             | OPERATOR    | -            | 4    |
+| `0`             | NUMBER      | 0            | 4    |
+| `)`             | DELIMITER   | -            | 4    |
+| `{`             | DELIMITER   | -            | 4    |
+| `x`             | IDENTIFIER  | -            | 6    |
+| `=`             | OPERATOR    | -            | 6    |
+| `x`             | IDENTIFIER  | -            | 6    |
+| `-`             | OPERATOR    | -            | 6    |
+| `1`             | NUMBER      | 1            | 6    |
+| `;`             | DELIMITER   | -            | 6    |
+| `printf`        | IDENTIFIER  | -            | 7    |
+| `(`             | DELIMITER   | -            | 7    |
+| `"Hello World"` | STRING_LIT  | Hello World  | 7    |
+| `)`             | DELIMITER   | -            | 7    |
+| `;`             | DELIMITER   | -            | 7    |
+| `return`        | KEYWORD     | -            | 8    |
+| `c`             | IDENTIFIER  | -            | 8    |
+| `;`             | DELIMITER   | -            | 8    |
+| `}`             | DELIMITER   | -            | 9    |
+| `}`             | DELIMITER   | -            | 10   |
 
 ---
