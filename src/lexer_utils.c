@@ -235,18 +235,18 @@ const char* getTokenTypeString(TokenType type) {
     }
 }
 
-void printTokenHeader() {
-    printf("+--------------+----------------------+-------------+--------+\n");
-    printf("| Type         | Lexeme               | Value       | Line   |\n");
-    printf("+--------------+----------------------+-------------+--------+\n");
+void printTokenHeader(FILE* print_to) {
+    fprintf(print_to,"+--------------+----------------------+-------------+--------+\n");
+    fprintf(print_to,"| Type         | Lexeme               | Value       | Line   |\n");
+    fprintf(print_to,"+--------------+----------------------+-------------+--------+\n");
 }
 
-void printTokenFooter() {
-    printf("+--------------+----------------------+-------------+--------+\n");
+void printTokenFooter(FILE* print_to) {
+    fprintf(print_to,"+--------------+----------------------+-------------+--------+\n");
 }
 
 
-void printToken(const Token* t) {
+void printToken(const Token* t,FILE* print_to) {
     char valueStr[32] = "-";
 
     if (t->type == TOKEN_NUMBER) {
@@ -256,7 +256,7 @@ void printToken(const Token* t) {
             sprintf(valueStr, "%.2f", t->numberValue);
     }
 
-    printf("| %-12s | %-20s | %-11s | %-6d |\n",
+    fprintf(print_to,"| %-12s | %-20s | %-11s | %-6d |\n",
         getTokenTypeString(t->type),
         t->lexeme ? t->lexeme : "NULL",
         valueStr,

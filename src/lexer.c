@@ -138,9 +138,16 @@ Token getNextToken(FILE* file) {
 
 //exo12
 int main(int argc, char *argv[]) {
+    // lexer <input> -o <output>
+    
     if (argc == 1){ 
         printf("provide filename as a command line argument\n");
         return 0; 
+    }
+
+    FILE* print_to = stdout;
+    if (argc == 4 && strcmp(argv[2],"-o") == 0){
+        print_to = fopen(argv[3],"w");
     }
 
     FILE *file = fopen(argv[1], "r");
@@ -149,14 +156,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    printf("--- Lexing file: %s ---\n", argv[1]);
-    printTokenHeader();
+    fprintf(print_to,"--- Lexing file: %s ---\n", argv[1]);
+    printTokenHeader(print_to);
     
     Token t;
     do {
         t = getNextToken(file);
         
-        printToken(&t); 
+        printToken(&t,print_to); 
 
         if (t.lexeme != NULL) {
             free(t.lexeme);
@@ -165,7 +172,7 @@ int main(int argc, char *argv[]) {
         
     } while (t.type != TOKEN_EOF);
 
-    printTokenFooter();
+    printTokenFooter(print_to);
 
     fclose(file);
     return 0;
