@@ -137,7 +137,7 @@ int isDelimiter(const char* s) {
 int isOperator(const char* s) {
     static const char* OPERATORS[] = {
         "+", "-", "*", "/", "%", "=", "==", "!=", "<", "<=", ">", ">=",
-        "++", "--", "+=", "-=", "*=", "/=", "&&", "||", "!"
+        "++", "--", "+=", "-=", "*=", "/=", "&&", "||", "!" , "&", "|", "~", "<<", ">>"
     };
     int count = sizeof(OPERATORS) / sizeof(OPERATORS[0]);
 
