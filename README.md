@@ -1,5 +1,22 @@
 "# compiler" 
 
+# How to compile and run
+Compile with:
+```bash
+gcc lexer.c -o lexer
+```
+
+Run with:
+```bash
+./lexer input [-o output]
+```
+
+examples:
+```bash
+./lexer input.c
+./lexer input.c -o output
+```
+
 
 # Exercise to Filename Mapping
 This mapping tells where each exercise live in the code
