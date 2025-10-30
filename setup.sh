@@ -6,7 +6,7 @@ git clone git@github.com:MohammedBoure/compiler.git || git clone https://github.
 zip -r --password 2222 source-code.zip compiler
 
 
-zip source-code.zip readme.txt test.zip
+zip test.zip readme.txt source-code.zip
 
 
 # clean
